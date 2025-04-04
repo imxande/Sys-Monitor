@@ -23,6 +23,13 @@ private:
    * @brief Main window UI configuration
   */
   void configUI();
+
+  /*
+   * @brief Layout setup
+  */
+  void setLayout();
+
+
 };
 
 #endif // MAIN_WINDOW_H

@@ -1,10 +1,15 @@
 #include "MainWindow.h"
 #include <QScreen>
+#include <QVBoxLayout>
+#include <QTabWidget>
 
 // init Main Window
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   // load main window config
   configUI();
+
+  // set layout
+  setLayout();
 }
 
 // destructor
@@ -25,4 +30,29 @@ void MainWindow::configUI() {
 
   // name of window
   setWindowTitle("System Monitor");
+}
+
+// Layout setup
+void MainWindow::setLayout() {
+  // create central widget
+  QWidget *centralWidget = new QWidget(this);
+  setCentralWidget(centralWidget);
+
+  // create and set main layout
+  QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget);
+
+  // create tabs
+  QTabWidget *tabs = new QTabWidget(centralWidget);
+  QWidget *processTab = new QWidget();
+  QWidget *resourcesTab = new QWidget();
+  QWidget *fileSystemTab = new QWidget();
+
+  // add each tab widget
+  tabs->addTab(processTab, "Process");
+  tabs->addTab(resourcesTab, "Resources");
+  tabs->addTab(fileSystemTab, "File Systems");
+
+  // add tabs to main layout
+  mainLayout->addWidget(tabs);
+  
 }

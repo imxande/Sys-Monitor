@@ -12,9 +12,13 @@ qt_standard_project_setup()
 # sources
 set(SOURCES 
   src/main.cpp
-  src/MainWindow.cpp
+  src/mainWindow.cpp
+  src/processTab.cpp
 )
-set(HEADERS includes/MainWindow.h)
+set(HEADERS 
+  includes/mainWindow.h
+  includes/processTab.h
+)
 
 # executable
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})

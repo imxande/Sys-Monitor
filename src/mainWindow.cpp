@@ -1,7 +1,8 @@
-#include "MainWindow.h"
+#include "mainWindow.h"
 #include <QScreen>
 #include <QVBoxLayout>
 #include <QTabWidget>
+#include "processTab.h"
 
 // init Main Window
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
@@ -43,7 +44,7 @@ void MainWindow::setLayout() {
 
   // create tabs
   QTabWidget *tabs = new QTabWidget(centralWidget);
-  QWidget *processTab = new QWidget();
+  QWidget *processTab = new ProcessTab(this);
   QWidget *resourcesTab = new QWidget();
   QWidget *fileSystemTab = new QWidget();
 

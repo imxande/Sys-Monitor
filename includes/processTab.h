@@ -1,7 +1,9 @@
 #ifndef PROCESS_TAB_H
 #define PROCESS_TAB_H
 
+#include "processManager.h"
 #include <QStringList>
+#include <QTableWidget>
 #include <QWidget>
 
 class ProcessTab : public QWidget {
@@ -31,8 +33,17 @@ public:
    */
   const QStringList getHeaderLabels() const;
 
+private slots:
+  void updateProcessTable(const QList<ProcessManager::ProcessInfo> &processList);
+  void testReceiver(const QStringList &data);
+
+
 private:
   const QStringList headerLabels = {"Process", "User", "%CPU", "ID", "Memory"};
+  ProcessManager *processManager; // ProcessManager instance to handle processes
+  QTableWidget *processTable;
+
+
 };
 
 #endif // PROCESS_TAB_H

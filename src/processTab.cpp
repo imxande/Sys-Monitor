@@ -1,50 +1,41 @@
+#include "processManager.h"
 #include "processTab.h"
-#include <QVBoxLayout>
-#include <QTableWidget>
-#include <QTableWidgetItem>
+#include <QAbstractItemView>
+#include <QDebug>
 #include <QHeaderView>
-	#include <QAbstractItemView>
+#include <QTableWidgetItem>
+#include <QVBoxLayout>
 
 // Init ProcessTab
 ProcessTab::ProcessTab(QWidget *parent) : QWidget(parent) {
+  // init process manager
+  processManager = new ProcessManager(this);
+
+ // connect signal from ProcessManager to update ProcessTab
+  connect(processManager, &ProcessManager::processListUpdated, this,
+          &ProcessTab::updateProcessTable);
+
+  connect(processManager, &ProcessManager::testSignal,
+        this, &ProcessTab::testReceiver);
+
+
+  // set table layout
   const QStringList labels = getHeaderLabels();
   setProcessLayout(labels);
 }
 
 // destructor
-ProcessTab::~ProcessTab(){}
+ProcessTab::~ProcessTab() {}
 
 // Process layout setup
 void ProcessTab::setProcessLayout(const QStringList &labels) {
-  // setup
-  QVBoxLayout *processLayout = new QVBoxLayout(this);  
-  QTableWidget *processTable = new QTableWidget(this);
-  processTable->setColumnCount(5);
+  // table layout
+  QVBoxLayout *processLayout = new QVBoxLayout(this);
+
+  // create table
+  processTable = new QTableWidget(this);
+  processTable->setColumnCount(labels.size());
   processTable->setHorizontalHeaderLabels(labels);
-
-  // dummy rows for now
-  processTable->setRowCount(3);
-  
-  // process gnome-shell
-  processTable->setItem(0, 0, new QTableWidgetItem("gnome-shell")); // name
-  processTable->setItem(0, 1, new QTableWidgetItem("xande"));       // user
-  processTable->setItem(0, 2, new QTableWidgetItem("15.3"));        // %cpu
-  processTable->setItem(0, 3, new QTableWidgetItem("1234"));        // ID
-  processTable->setItem(0, 4, new QTableWidgetItem("200 MB"));      // MEM
-
-  // process xorg
-  processTable->setItem(1, 0, new QTableWidgetItem("xorg")); // name
-  processTable->setItem(1, 1, new QTableWidgetItem("root"));       // user
-  processTable->setItem(1, 2, new QTableWidgetItem("8.1"));        // %cpu
-  processTable->setItem(1, 3, new QTableWidgetItem("456"));        // ID
-  processTable->setItem(1, 4, new QTableWidgetItem("150 MB"));      
-
-  // process google-chrome
-  processTable->setItem(2, 0, new QTableWidgetItem("google-chrome")); // name
-  processTable->setItem(2, 1, new QTableWidgetItem("xande"));       // user
-  processTable->setItem(2, 2, new QTableWidgetItem("33.7"));        // %cpu
-  processTable->setItem(2, 3, new QTableWidgetItem("7890"));        // ID
-  processTable->setItem(2, 4, new QTableWidgetItem("500 MB"));      
 
   // config and positioning
   processTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -52,12 +43,42 @@ void ProcessTab::setProcessLayout(const QStringList &labels) {
   processTable->verticalHeader()->setVisible(false);
   processTable->horizontalHeader()->setDefaultAlignment(Qt::AlignCenter);
 
-
   // add table to layout
   processLayout->addWidget(processTable);
 }
 
 // Header Lables getter
-const QStringList ProcessTab::getHeaderLabels() const {
-  return headerLabels;
+const QStringList ProcessTab::getHeaderLabels() const { return headerLabels; }
+
+// Update process table
+void ProcessTab::updateProcessTable(
+    const QList<ProcessManager::ProcessInfo> &processList) {
+  // sanity check
+  qDebug() << "[DEBUG] updateProcessTable called. Process count:"
+           << processList.size();
+  qDebug() << "[DEBUG] processTable exists:" << (processTable != nullptr);
+
+  // clear rows
+  processTable->setRowCount(0);
+
+  // populate process table
+  int row = 0;
+  for (const auto &proc : processList) {
+    processTable->insertRow(row);
+    processTable->setItem(row, 0, new QTableWidgetItem(proc.name));
+    processTable->setItem(row, 1, new QTableWidgetItem(proc.user));
+    processTable->setItem(
+        row, 2, new QTableWidgetItem(QString::number(proc.cpuPercent, 'f', 2)));
+    processTable->setItem(row, 3,
+                          new QTableWidgetItem(QString::number(proc.pid)));
+    processTable->setItem(
+        row, 4,
+        new QTableWidgetItem(QString::number(proc.memory, 'f', 2) + "MB"));
+    ++row;
+  }
 }
+
+void ProcessTab::testReceiver(const QStringList &data) {
+    qDebug() << "[DEBUG] testReceiver called:" << data;
+}
+

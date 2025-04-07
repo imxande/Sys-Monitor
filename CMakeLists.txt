@@ -14,10 +14,12 @@ set(SOURCES
   src/main.cpp
   src/mainWindow.cpp
   src/processTab.cpp
+  src/processManager.cpp
 )
 set(HEADERS 
   includes/mainWindow.h
   includes/processTab.h
+  includes/processManager.h
 )
 
 # executable

@@ -25,6 +25,7 @@ signals:
 private:
   QList<ProcessInfo> processList;
   void updateProcessList();
+  QList<ProcessInfo> scanProcStatus();
 };
 
 #endif // PROCESS_MANAGER_H

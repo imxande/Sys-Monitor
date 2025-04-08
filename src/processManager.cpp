@@ -1,22 +1,21 @@
 #include "processManager.h"
+#include <QTimer>
 
+// constructor
 ProcessManager::ProcessManager(QObject *parent) : QObject(parent) {
-  // populate list of processes
-  updateProcessList();
+  // delay signal till slot ready and connection is established - populate processes list
+  QTimer::singleShot(0, this, [this]() { updateProcessList(); });
 }
 
 // destructor
 ProcessManager::~ProcessManager() {}
 
 // Fetch processes
-QList<ProcessManager::ProcessInfo> ProcessManager::getProcesses() const {
-  return processList;
-}
+QList<ProcessInfo> ProcessManager::getProcesses() const { return processList; }
 
 // Populate list with dummy data for now
 void ProcessManager::updateProcessList() {
   QList<ProcessInfo> data;
-
 
   // processes
   ProcessInfo p1 = {"firefox", "xande", 12.5f, 4567, 350.2};
@@ -29,9 +28,6 @@ void ProcessManager::updateProcessList() {
   // update process list
   processList = data;
 
-  QStringList dummy = { "Test", "Signal", "Working" };
-
   // notify ProcessTab
   emit processListUpdated(processList);
-  emit testSignal(dummy);
 }

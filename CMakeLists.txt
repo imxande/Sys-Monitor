@@ -20,6 +20,7 @@ set(HEADERS
   includes/mainWindow.h
   includes/processTab.h
   includes/processManager.h
+  includes/processInfo.h
 )
 
 # executable

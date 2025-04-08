@@ -11,13 +11,10 @@ ProcessTab::ProcessTab(QWidget *parent) : QWidget(parent) {
   // init process manager
   processManager = new ProcessManager(this);
 
- // connect signal from ProcessManager to update ProcessTab
-  connect(processManager, &ProcessManager::processListUpdated, this,
-          &ProcessTab::updateProcessTable);
-
-  connect(processManager, &ProcessManager::testSignal,
-        this, &ProcessTab::testReceiver);
-
+  // connect signal from ProcessManager to update ProcessTab
+  bool success = connect(processManager, &ProcessManager::processListUpdated,
+                         this, &ProcessTab::updateProcessTable);
+  qDebug() << "[DEBUG] Signal-slot connection successful?" << success;
 
   // set table layout
   const QStringList labels = getHeaderLabels();
@@ -51,19 +48,21 @@ void ProcessTab::setProcessLayout(const QStringList &labels) {
 const QStringList ProcessTab::getHeaderLabels() const { return headerLabels; }
 
 // Update process table
-void ProcessTab::updateProcessTable(
-    const QList<ProcessManager::ProcessInfo> &processList) {
-  // sanity check
-  qDebug() << "[DEBUG] updateProcessTable called. Process count:"
-           << processList.size();
-  qDebug() << "[DEBUG] processTable exists:" << (processTable != nullptr);
+void ProcessTab::updateProcessTable(const QList<ProcessInfo> &processList) {
+
+  qDebug() << "[DEBUG] updateProcessTable called";
+  qDebug() << "[DEBUG] row count:" << processList.size();
+
+  if (!processTable) {
+    qDebug() << "[ERROR] processTable is null!";
+  }
 
   // clear rows
   processTable->setRowCount(0);
 
-  // populate process table
   int row = 0;
   for (const auto &proc : processList) {
+    // populate process table
     processTable->insertRow(row);
     processTable->setItem(row, 0, new QTableWidgetItem(proc.name));
     processTable->setItem(row, 1, new QTableWidgetItem(proc.user));
@@ -74,11 +73,7 @@ void ProcessTab::updateProcessTable(
     processTable->setItem(
         row, 4,
         new QTableWidgetItem(QString::number(proc.memory, 'f', 2) + "MB"));
+
     ++row;
   }
 }
-
-void ProcessTab::testReceiver(const QStringList &data) {
-    qDebug() << "[DEBUG] testReceiver called:" << data;
-}
-

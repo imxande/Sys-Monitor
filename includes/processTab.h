@@ -2,6 +2,7 @@
 #define PROCESS_TAB_H
 
 #include "processManager.h"
+#include "processInfo.h"
 #include <QStringList>
 #include <QTableWidget>
 #include <QWidget>
@@ -34,8 +35,7 @@ public:
   const QStringList getHeaderLabels() const;
 
 private slots:
-  void updateProcessTable(const QList<ProcessManager::ProcessInfo> &processList);
-  void testReceiver(const QStringList &data);
+  void updateProcessTable(const QList<ProcessInfo> &processList);
 
 
 private:

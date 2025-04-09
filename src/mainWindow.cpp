@@ -47,12 +47,12 @@ void MainWindow::setLayout() {
   QTabWidget *tabs = new QTabWidget(centralWidget);
   QWidget *processTab = new ProcessTab(this);
   QWidget *resourcesTab = new QWidget(this);
-  QWidget *fileSystemTab = new FileSystemsTab(this);
+  QWidget *fileSystemsTab = new FileSystemsTab(this);
 
   // add each tab widget
   tabs->addTab(processTab, "Process");
   tabs->addTab(resourcesTab, "Resources");
-  tabs->addTab(fileSystemTab, "File Systems");
+  tabs->addTab(fileSystemsTab, "File Systems");
 
   // add tabs to main layout
   mainLayout->addWidget(tabs);

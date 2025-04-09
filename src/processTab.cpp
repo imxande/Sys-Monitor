@@ -14,7 +14,6 @@ ProcessTab::ProcessTab(QWidget *parent) : QWidget(parent) {
   // connect signal from ProcessManager to update ProcessTab
   bool success = connect(processManager, &ProcessManager::processListUpdated,
                          this, &ProcessTab::updateProcessTable);
-  qDebug() << "[DEBUG] Signal-slot connection successful?" << success;
 
   // set table layout
   const QStringList labels = getHeaderLabels();
@@ -49,10 +48,6 @@ const QStringList ProcessTab::getHeaderLabels() const { return headerLabels; }
 
 // Update process table
 void ProcessTab::updateProcessTable(const QList<ProcessInfo> &processList) {
-
-  qDebug() << "[DEBUG] updateProcessTable called";
-  qDebug() << "[DEBUG] row count:" << processList.size();
-
   if (!processTable) {
     qDebug() << "[ERROR] processTable is null!";
   }

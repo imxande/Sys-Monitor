@@ -1,8 +1,9 @@
+#include "fileSystemsTab.h"
 #include "mainWindow.h"
-#include <QScreen>
-#include <QVBoxLayout>
-#include <QTabWidget>
 #include "processTab.h"
+#include <QScreen>
+#include <QTabWidget>
+#include <QVBoxLayout>
 
 // init Main Window
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
@@ -45,8 +46,8 @@ void MainWindow::setLayout() {
   // create tabs
   QTabWidget *tabs = new QTabWidget(centralWidget);
   QWidget *processTab = new ProcessTab(this);
-  QWidget *resourcesTab = new QWidget();
-  QWidget *fileSystemTab = new QWidget();
+  QWidget *resourcesTab = new QWidget(this);
+  QWidget *fileSystemTab = new FileSystemsTab(this);
 
   // add each tab widget
   tabs->addTab(processTab, "Process");
@@ -55,5 +56,4 @@ void MainWindow::setLayout() {
 
   // add tabs to main layout
   mainLayout->addWidget(tabs);
-  
 }

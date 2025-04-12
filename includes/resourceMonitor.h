@@ -57,6 +57,8 @@ private slots:
 private:
   QTimer *updateTimer;
   float cpuUsage;
+  qulonglong prevTotal = 0;
+  qulonglong prevIdle = 0;
 };
 
 #endif // RESOURCE_MONITOR_H

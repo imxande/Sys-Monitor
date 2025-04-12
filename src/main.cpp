@@ -1,5 +1,6 @@
 #include "mainWindow.h"
 #include "processInfo.h"
+#include "resourceMonitor.h"
 #include "fileSystemInfo.h"
 #include <QApplication>
 #include <QMetaType>
@@ -15,6 +16,8 @@ int main(int argc, char *argv[]) {
   // create main window
   MainWindow monitor;
   monitor.show();
+
+  ResourceMonitor *rM = new ResourceMonitor();
 
   return app.exec();
 }

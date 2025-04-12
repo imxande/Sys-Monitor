@@ -16,6 +16,7 @@ set(SOURCES
   src/processTab.cpp
   src/processManager.cpp
   src/fileSystemsTab.cpp
+  src/resourceMonitor.cpp
 )
 set(HEADERS 
   includes/mainWindow.h
@@ -24,6 +25,7 @@ set(HEADERS
   includes/processInfo.h
   includes/fileSystemsTab.h
   includes/fileSystemInfo.h
+  includes/resourceMonitor.h
 )
 
 # executable

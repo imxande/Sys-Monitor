@@ -52,7 +52,7 @@ private slots:
    * This slot reacts to a system event, timeout
    * Notifies QML via signal
    */
-  void udpateCpuUsage();
+  void updateCpuUsage();
 
 private:
   QTimer *updateTimer;

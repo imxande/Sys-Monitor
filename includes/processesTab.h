@@ -1,5 +1,5 @@
-#ifndef PROCESS_TAB_H
-#define PROCESS_TAB_H
+#ifndef PROCESSES_TAB_H
+#define PROCESSES_TAB_H
 
 #include "processManager.h"
 #include "processInfo.h"
@@ -7,7 +7,7 @@
 #include <QTableWidget>
 #include <QWidget>
 
-class ProcessTab : public QWidget {
+class ProcessesTab : public QWidget {
   // for signals and slots
   Q_OBJECT
 
@@ -15,10 +15,10 @@ public:
   /*
    * @brief Constructs the ProcessTab
    */
-  explicit ProcessTab(QWidget *parent = nullptr);
+  explicit ProcessesTab(QWidget *parent = nullptr);
 
   // Destructor
-  ~ProcessTab();
+  ~ProcessesTab();
 
   /*
    * @brief Set process layout configuration
@@ -46,4 +46,4 @@ private:
 
 };
 
-#endif // PROCESS_TAB_H
+#endif // PROCESSES_TAB_H

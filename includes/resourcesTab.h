@@ -1,5 +1,5 @@
-#ifndef RESOURCE_TAB_H
-#define RESOURCE_TAB_H
+#ifndef RESOURCES_TAB_H
+#define RESOURCES_TAB_H
 
 #include <QWidget>
 #include <QVBoxLayout>
@@ -8,14 +8,14 @@
 /* @brief ResourceTab provides a real-time visual monitoring of overall system metrics.
  * Displays CPU Usage, Memory and Swap, Network Activity and Disk I/O live graphs.
  */
-class ResourceTab : public QWidget {
+class ResourcesTab : public QWidget {
   // for signals and slots 
   Q_OBJECT
 
 public:
-  explicit ResourceTab(QWidget *parent = nullptr); 
-  ~ResourceTab();
+  explicit ResourcesTab(QWidget *parent = nullptr); 
+  ~ResourcesTab();
  
 };
 
-#endif // RESOURCE_TAB_H
+#endif // RESOURCES_TAB_H

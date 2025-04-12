@@ -5,8 +5,10 @@
 #include <QMetaType>
 
 int main(int argc, char *argv[]) {
-  // register ProcessInfo struct in order for the Type to be used in queued
-  // signal slots connection
+  /*
+   * Register ProcessInfo struct in order for the Type
+   * to be used in queued signal slots connection.
+   */
   qRegisterMetaType<ProcessInfo>("ProcessInfo");
   qRegisterMetaType<QList<ProcessInfo>>("QList<ProcessInfo>");
 

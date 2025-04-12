@@ -1,5 +1,5 @@
 #include "processManager.h"
-#include "processTab.h"
+#include "processesTab.h"
 #include <QAbstractItemView>
 #include <QDebug>
 #include <QHeaderView>
@@ -7,13 +7,13 @@
 #include <QVBoxLayout>
 
 // Init ProcessTab
-ProcessTab::ProcessTab(QWidget *parent) : QWidget(parent) {
+ProcessesTab::ProcessesTab(QWidget *parent) : QWidget(parent) {
   // init process manager
   processManager = new ProcessManager(this);
 
   // connect signal from ProcessManager to update ProcessTab
   bool success = connect(processManager, &ProcessManager::processListUpdated,
-                         this, &ProcessTab::updateProcessTable);
+                         this, &ProcessesTab::updateProcessTable);
 
   // set table layout
   const QStringList labels = getHeaderLabels();
@@ -21,10 +21,10 @@ ProcessTab::ProcessTab(QWidget *parent) : QWidget(parent) {
 }
 
 // destructor
-ProcessTab::~ProcessTab() {}
+ProcessesTab::~ProcessesTab() {}
 
 // Process layout setup
-void ProcessTab::setProcessLayout(const QStringList &labels) {
+void ProcessesTab::setProcessLayout(const QStringList &labels) {
   // table layout
   QVBoxLayout *processLayout = new QVBoxLayout(this);
 
@@ -44,10 +44,10 @@ void ProcessTab::setProcessLayout(const QStringList &labels) {
 }
 
 // Header Lables getter
-const QStringList ProcessTab::getHeaderLabels() const { return headerLabels; }
+const QStringList ProcessesTab::getHeaderLabels() const { return headerLabels; }
 
 // Update process table
-void ProcessTab::updateProcessTable(const QList<ProcessInfo> &processList) {
+void ProcessesTab::updateProcessTable(const QList<ProcessInfo> &processList) {
   if (!processTable) {
     qDebug() << "[ERROR] processTable is null!";
   }

@@ -13,6 +13,9 @@ class ResourceMonitor : public QObject {
   // for signals and slots
   Q_OBJECT
 
+  // expose cpu usage to QML
+  Q_PROPERTY(float cpuUsage READ getCpuUsage NOTIFY cpuUsageChanged)
+
 public:
   ResourceMonitor(QObject *parent = nullptr);
   ~ResourceMonitor();

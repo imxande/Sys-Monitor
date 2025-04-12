@@ -1,12 +1,14 @@
 #ifndef FILESYSTEMS_TAB_H
 #define FILESYSTEMS_TAB_H
 
+#include "fileSystemInfo.h"
 #include <QStringList>
-#include <QWidget>
 #include <QTableWidget>
+#include <QWidget>
 
 /*
- * @brief File System Tab displays mounted file systems */
+ * @brief File System Tab displays mounted file systems 
+*/
 class FileSystemsTab : public QWidget {
   // for signal and slots
   Q_OBJECT
@@ -25,16 +27,29 @@ public:
    */
   void setLayout(const QStringList &labels);
 
-  /* @brief Gets header labels
+  /*
+   * @brief Gets header labels
    *
    * @return labels List of labels
    */
   const QStringList getHeaderLabels() const;
 
+  /* @brief Populates file system info struct
+   *
+   * @return info for each item in a list of all mounted file systems
+   */
+  QList<FileSystemInfo> getMountedFileSystems();
+
+  /*
+   * @brief Populate file system table 
+   */
+  void populateTable(const QList<FileSystemInfo> &list);
+
 private:
   QTableWidget *sysTable;
   const QStringList labels = {"Available", "Device", "Directory",
-                        "Type",      "Total",  "Used"};
+                              "Type",      "Total",  "Used"};
 };
 
 #endif // FILESYSTEMS_TAB_H
+

@@ -1,5 +1,6 @@
 #include "mainWindow.h"
 #include "processInfo.h"
+#include "fileSystemInfo.h"
 #include <QApplication>
 #include <QMetaType>
 

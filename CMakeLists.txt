@@ -23,6 +23,7 @@ set(HEADERS
   includes/processManager.h
   includes/processInfo.h
   includes/fileSystemsTab.h
+  includes/fileSystemInfo.h
 )
 
 # executable

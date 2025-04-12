@@ -18,7 +18,7 @@ class ResourceMonitor : public QObject {
   Q_PROPERTY(float cpuUsage READ getCpuUsage NOTIFY cpuUsageChanged)
 
 public:
-  ResourceMonitor(QObject *parent = nullptr);
+  explicit ResourceMonitor(QObject *parent = nullptr);
   ~ResourceMonitor();
 
   /*

@@ -1,12 +1,12 @@
+#include "fileSystemInfo.h"
 #include "mainWindow.h"
 #include "processInfo.h"
-#include "resourceMonitor.h"
-#include "fileSystemInfo.h"
 #include <QApplication>
 #include <QMetaType>
 
 int main(int argc, char *argv[]) {
-  // register ProcessInfo struct in order for the Type to be used in queued signal slots connection
+  // register ProcessInfo struct in order for the Type to be used in queued
+  // signal slots connection
   qRegisterMetaType<ProcessInfo>("ProcessInfo");
   qRegisterMetaType<QList<ProcessInfo>>("QList<ProcessInfo>");
 
@@ -16,8 +16,6 @@ int main(int argc, char *argv[]) {
   // create main window
   MainWindow monitor;
   monitor.show();
-
-  ResourceMonitor *rM = new ResourceMonitor();
 
   return app.exec();
 }

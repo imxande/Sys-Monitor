@@ -15,9 +15,6 @@ ResourceMonitor::ResourceMonitor(QObject *parent) : QObject(parent) {
 
   // start timer for 1s intervals
   updateTimer->start(1000);
-
-  // sanity check
-  readCpuUsage();
 }
 
 // destructor
@@ -37,12 +34,12 @@ void ResourceMonitor::updateCpuUsage() {
 
   // compute deltas
   if (prevTotal != 0 && prevIdle != 0) {
-    deltaTotal = totalNow - prevTotal;  
+    deltaTotal = totalNow - prevTotal;
     deltaIdle = idleNow - prevIdle;
 
     if (deltaTotal > 0) {
       float usage = 1.0f - (static_cast<float>(deltaIdle) / deltaTotal);
-      
+
       // calculate actual CPU percentage
       cpuUsage = usage * 100.0f;
 
@@ -74,10 +71,12 @@ QPair<qulonglong, qulonglong> ResourceMonitor::readCpuUsage() {
   // read from proc/stat
   QString line = in.readLine();
 
+  // capture all usage into tokens
   if (!line.isEmpty()) {
     tokens = line.split(" ", Qt::SkipEmptyParts);
+
+    // usage stats
     if (tokens.size() >= 11) {
-      // usage stats
       qulonglong user = tokens[1].toULongLong();
       qulonglong nice = tokens[2].toULongLong();
       qulonglong system = tokens[3].toULongLong();

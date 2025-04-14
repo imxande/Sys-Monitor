@@ -2,7 +2,7 @@
 #define RESOURCES_TAB_H
 
 #include "resourceMonitor.h"
-#include <QBoxGroup>
+#include <QGroupBox>
 #include <QQuickWidget>
 #include <QWidget>
 

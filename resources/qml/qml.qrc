@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/qml">
+    <file>cpuGraph.qml</file>
+  </qresource>
+</RCC>
+

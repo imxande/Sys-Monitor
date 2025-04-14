@@ -45,7 +45,6 @@ void ResourceMonitor::updateCpuUsage() {
 
       // emit signal
       emit cpuUsageChanged();
-      qDebug() << "CPU usage (%)" << cpuUsage;
     }
   }
 

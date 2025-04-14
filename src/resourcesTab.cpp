@@ -1,8 +1,11 @@
 #include "resourcesTab.h"
-#include <QVBoxLayout>
-#include <QQmlContext>
-#include <QUrl>
 #include <QDebug>
+#include <QFrame>
+#include <QLabel>
+#include <QQmlContext>
+#include <QToolButton>
+#include <QUrl>
+#include <QVBoxLayout>
 
 // Init Resource Tab
 ResourcesTab::ResourcesTab(QWidget *parent) : QWidget(parent) {
@@ -26,45 +29,63 @@ ResourcesTab::ResourcesTab(QWidget *parent) : QWidget(parent) {
 }
 
 // destructor
-ResourcesTab::~ResourcesTab(){}
+ResourcesTab::~ResourcesTab() {}
 
 // Set resources tab layout
 void ResourcesTab::setResourcesLayout() {
-  // layout
-  QVBoxLayout *resourcesLayout = new QVBoxLayout();
+  // placeholder
+  QVBoxLayout *resourcesLayout = new QVBoxLayout;
 
-  // CPU group box
-  cpuBox = new QGroupBox("CPU");
-  cpuBox->setCheckable(true);
-  cpuBox->setChecked(true);
+  // Toogle buttons
+  resourcesLayout->addWidget(createSection("CPU"));
+  resourcesLayout->addWidget(createSection("Memory and Swap"));
+  resourcesLayout->addWidget(createSection("Network"));
+  resourcesLayout->addWidget(createSection("Disk"));
 
-  // Memory/Swap group box
-  memSwapBox = new QGroupBox("Memory and Swap");
-  memSwapBox->setCheckable(true);
-  memSwapBox->setChecked(false);
-
-  // Network group box
-  QGroupBox *networkBox = new QGroupBox("Network");
-  networkBox->setCheckable(true);
-  networkBox->setChecked(false);
-
-  // Disk group box
-  QGroupBox *diskBox = new QGroupBox("Disk");
-  diskBox->setCheckable(true);
-  diskBox->setChecked(false);
-
-
-  // CPU layout
-  QVBoxLayout *cpuLayout = new QVBoxLayout(this);
-  cpuLayout->addWidget(cpuGraph); // add graph widget to CPU layout
-  cpuBox->setLayout(cpuLayout);  // set CPU box layout
- 
-
-  // add group boxes to resources tab main layout
-  resourcesLayout->addWidget(cpuBox);       
-  resourcesLayout->addWidget(memSwapBox);
-  resourcesLayout->addWidget(networkBox);
-  resourcesLayout->addWidget(diskBox);
-
+  // set layout
   setLayout(resourcesLayout);
+}
+
+// Creates collapsible section
+QWidget *ResourcesTab::createSection(const QString &title) {
+  // placeholder
+  QWidget *section = new QWidget(this); // section widget
+
+  // toggle button
+  QToolButton *toggleButton = new QToolButton(section);
+  toggleButton->setText(title);
+  toggleButton->setCheckable(true);
+  toggleButton->setChecked(true);
+  toggleButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
+  toggleButton->setArrowType(Qt::DownArrow);
+
+  // collapsible content
+  QFrame *content = new QFrame(section);
+  content->setFrameShape(QFrame::StyledPanel);
+  content->setVisible(true);
+
+  // content layout
+  QVBoxLayout *contentLayout = new QVBoxLayout(content);
+  // set cpu graph
+  if (title == "CPU") {
+    contentLayout->addWidget(cpuGraph);
+  } else {
+    QLabel *dummyLabel = new QLabel(title + " Graph HERE", content);
+    dummyLabel->setStyleSheet("color: white;");
+    contentLayout->addWidget(dummyLabel);
+  }
+
+  // collapse logic
+  connect(toggleButton, &QToolButton::toggled, [=](bool checked) {
+    content->setVisible(checked);
+    toggleButton->setArrowType(checked ? Qt::DownArrow : Qt::RightArrow);
+  });
+
+  // section layout
+  QVBoxLayout *sectionLayout = new QVBoxLayout(section);
+  sectionLayout->setContentsMargins(0, 0, 0, 0);
+  sectionLayout->addWidget(toggleButton);
+  sectionLayout->addWidget(content);
+
+  return section;
 }

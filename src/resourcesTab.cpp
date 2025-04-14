@@ -24,13 +24,30 @@ ResourcesTab::ResourcesTab(QWidget *parent) : QWidget(parent) {
   memGraph->rootContext()->setContextProperty("resourceMonitor", monitor);
   memGraph->setSource(QUrl("qrc:/qml/memGraph.qml"));
 
+  // Network graph
+  networkGraph = new QQuickWidget(this);
+  networkGraph->setResizeMode(QQuickWidget::SizeRootObjectToView);
+  networkGraph->rootContext()->setContextProperty("resourceMonitor", monitor);
+  networkGraph->setSource(QUrl("qrc:qml/networkGraph.qml"));
+
+  // Disk graph
+  diskGraph = new QQuickWidget(this);
+  diskGraph->setResizeMode(QQuickWidget::SizeRootObjectToView);
+  diskGraph->rootContext()->setContextProperty("resourceMonitor", monitor);
+  diskGraph->setSource(QUrl("qrc:qml/diskGraph.qml"));
+
+
 
   // sanity check
   if (cpuGraph->status() != QQuickWidget::Ready) {
     qDebug() << "QML failed to load!" << cpuGraph->errors();
   } else if (memGraph->status() != QQuickWidget::Ready) {
     qDebug() << "Memory and Swap QML failed to load!" << memGraph->errors();
-  }
+  }  else if (networkGraph->status() != QQuickWidget::Ready) {
+    qDebug() << "Network QML failed to load!" << networkGraph->errors();
+  }  else if (diskGraph->status() != QQuickWidget::Ready) {
+    qDebug() << "Disk QML failed to load!" << diskGraph->errors();
+  } 
 
   // load resource tab layout
   setResourcesLayout();
@@ -74,18 +91,17 @@ QWidget *ResourcesTab::createSection(const QString &title) {
 
   // content layout
   QVBoxLayout *contentLayout = new QVBoxLayout(content);
-  // set cpu graph
+  // set graphs
   if (title == "CPU") {
     contentLayout->addWidget(cpuGraph);
   } else if (title == "Memory and Swap") {
     contentLayout->addWidget(memGraph);
+  } else if (title == "Network") {
+    contentLayout->addWidget(networkGraph);
+  } else {
+    contentLayout->addWidget(diskGraph);
   }
 
-  else {
-    QLabel *dummyLabel = new QLabel(title + " Graph HERE", content);
-    dummyLabel->setStyleSheet("color: white;");
-    contentLayout->addWidget(dummyLabel);
-  }
 
   // collapse logic
   connect(toggleButton, &QToolButton::toggled, [=](bool checked) {

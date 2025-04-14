@@ -2,6 +2,8 @@
   <qresource prefix="/qml">
     <file>cpuGraph.qml</file>
     <file>memGraph.qml</file>
+    <file>networkGraph.qml</file>
+    <file>diskGraph.qml</file>
   </qresource>
 </RCC>
 

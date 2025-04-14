@@ -38,6 +38,9 @@ private:
   QGroupBox *networkBox;
   QGroupBox *diskBox;
   QQuickWidget *cpuGraph;
+  QQuickWidget *memGraph;
+  QQuickWidget *networkGraph;
+  QQuickWidget *diskGraph;
   ResourceMonitor *monitor;
 };
 

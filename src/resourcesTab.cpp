@@ -16,12 +16,20 @@ ResourcesTab::ResourcesTab(QWidget *parent) : QWidget(parent) {
   cpuGraph = new QQuickWidget(this);
   cpuGraph->setResizeMode(QQuickWidget::SizeRootObjectToView);
   cpuGraph->rootContext()->setContextProperty("resourceMonitor", monitor);
-  QUrl qmlURL("qrc:/qml/cpuGraph.qml");
-  cpuGraph->setSource(qmlURL);
+  cpuGraph->setSource(QUrl("qrc:/qml/cpuGraph.qml"));
+
+  // Memory and Swap graph
+  memGraph = new QQuickWidget(this); 
+  memGraph->setResizeMode(QQuickWidget::SizeRootObjectToView);
+  memGraph->rootContext()->setContextProperty("resourceMonitor", monitor);
+  memGraph->setSource(QUrl("qrc:/qml/memGraph.qml"));
+
 
   // sanity check
   if (cpuGraph->status() != QQuickWidget::Ready) {
     qDebug() << "QML failed to load!" << cpuGraph->errors();
+  } else if (memGraph->status() != QQuickWidget::Ready) {
+    qDebug() << "Memory and Swap QML failed to load!" << memGraph->errors();
   }
 
   // load resource tab layout
@@ -69,7 +77,11 @@ QWidget *ResourcesTab::createSection(const QString &title) {
   // set cpu graph
   if (title == "CPU") {
     contentLayout->addWidget(cpuGraph);
-  } else {
+  } else if (title == "Memory and Swap") {
+    contentLayout->addWidget(memGraph);
+  }
+
+  else {
     QLabel *dummyLabel = new QLabel(title + " Graph HERE", content);
     dummyLabel->setStyleSheet("color: white;");
     contentLayout->addWidget(dummyLabel);

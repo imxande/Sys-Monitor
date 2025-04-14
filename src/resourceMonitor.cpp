@@ -3,6 +3,8 @@
 #include <QFile>
 #include <QString>
 #include <QTextStream>
+#include <QRegularExpression>
+
 
 // Init resource monitor
 ResourceMonitor::ResourceMonitor(QObject *parent) : QObject(parent) {
@@ -10,8 +12,10 @@ ResourceMonitor::ResourceMonitor(QObject *parent) : QObject(parent) {
   updateTimer = new QTimer(this);
 
   // connect timeout signal to approptiate slot
-  connect(updateTimer, &QTimer::timeout, this,
-          &ResourceMonitor::updateCpuUsage);
+  connect(updateTimer, &QTimer::timeout, this, [this]() {
+    updateCpuUsage();
+    updateMemoryUsage();
+  });
 
   // start timer for 1s intervals
   updateTimer->start(1000);
@@ -94,4 +98,38 @@ QPair<qulonglong, qulonglong> ResourceMonitor::readCpuUsage() {
   }
 
   return {total, idleTotal};
+}
+
+// Get Memory usage
+float ResourceMonitor::getMemoryUsage() { return memoryUsage; }
+
+void ResourceMonitor::updateMemoryUsage() {
+  // placeholder
+  QFile memFile("/proc/meminfo");
+
+  // open file
+  if (!memFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    qDebug() << "Error reading " << memFile.fileName();
+    return;
+  }
+
+  // read file
+  QTextStream in(&memFile);
+  while (!in.atEnd()) {
+    QString line = in.readLine();
+
+    if (line.startsWith("MemTotal:"))
+      memTotal = line.split(QRegularExpression("\\s+"))[1].toULongLong();
+
+    else if (line.startsWith("MemAvailable:"))
+      memAvailable = line.split(QRegularExpression("\\s+"))[1].toULongLong();
+
+    if (memTotal && memAvailable)
+      break;
+  }
+
+  if (memTotal > 0) {
+    memoryUsage = 100.0f * (1.0 - (float(memAvailable) / memTotal));
+    emit memoryUsageChanged();
+  }
 }

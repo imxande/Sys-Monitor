@@ -14,9 +14,11 @@ class ResourceMonitor : public QObject {
   // for signals and slots
   Q_OBJECT
 
-  // expose cpu usage to QML
+  // expose properties to QML
   Q_PROPERTY(float cpuUsage READ getCpuUsage NOTIFY cpuUsageChanged)
   Q_PROPERTY(float memoryUsage READ getMemoryUsage NOTIFY memoryUsageChanged)
+  Q_PROPERTY(float rxRate READ getRxRate NOTIFY rxRateChanged)
+  Q_PROPERTY(float txRate READ getTxRate NOTIFY txRateChanged)
 
 public:
   explicit ResourceMonitor(QObject *parent = nullptr);
@@ -36,6 +38,20 @@ public:
    */
   float getMemoryUsage();
 
+  /*
+   * @brief Getter method for rxRate property
+   *
+   * @return The most recently computed receive rate in bytes/sec
+   */
+  float getRxRate();
+
+  /*
+   * @brief Getter method for txRate property
+   *
+   * @return The most recently computed transmit rate in bytes/sec
+   */
+  float getTxRate();
+
   /* @brief Method reads CPU time stats from system
    *
    * It parses the first line of /proc/stat to retrieve the cummulatice
@@ -49,6 +65,16 @@ public:
    */
   QPair<qulonglong, qulonglong> readCpuUsage();
 
+  /*
+   * @brief Reads /proc/net/dev toextract total number of bytes received
+   * and sent over all network interfaces.
+   *
+   * @return QPair containing:
+   * - first: total received bytes
+   * - second: total transmitted bytes
+   */
+  QPair<qulonglong, qulonglong> readNetworkBytes();
+
 signals:
   /*
    * @brief Notify QML that cpu usage value has change
@@ -56,9 +82,19 @@ signals:
   void cpuUsageChanged();
 
   /*
-   * @brief Notify QML tha memory usage value has change
+   * @brief Notify QML that memory usage value has change
    */
   void memoryUsageChanged();
+
+  /*
+   * brief Notify QML when rxRate has new value.
+   */
+  void rxRateChanged();
+
+  /*
+   * @brief Notifies QML when txRate has new value.
+   */
+  void txRateChanged();
 
 private slots:
   /* @brief updateCpuUsage runs on a 1s timer
@@ -77,14 +113,29 @@ private slots:
    */
   void updateMemoryUsage();
 
+  /*
+   * @brief Method is called periodically by timer every 1 sec.
+   * Reads current total bytes via readNetworkBytes().
+   * Compute deltas with prev values.
+   * Calculates rxRate and txRate in bytes/sec.
+   * Emits rxRateChanged() and txRateChanged() signals for QML to update graph.
+   * */
+  void updateNetworkRates();
+
 private:
   QTimer *updateTimer;
   float cpuUsage;
   float memoryUsage = 0.0f;
+  float rxRate = 0.0f;
+  float txRate = 0.0f;
   qulonglong prevTotal = 0;
   qulonglong prevIdle = 0;
   qulonglong memTotal = 0;
   qulonglong memAvailable = 0;
+  qulonglong totalRx = 0;
+  qulonglong totalTx = 0;
+  qulonglong prevRx = 0;
+  qulonglong prevTx = 0;
 };
 
 #endif // RESOURCE_MONITOR_H

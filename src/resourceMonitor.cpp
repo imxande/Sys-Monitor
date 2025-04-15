@@ -1,10 +1,9 @@
 #include "resourceMonitor.h"
 #include <QDebug>
 #include <QFile>
+#include <QRegularExpression>
 #include <QString>
 #include <QTextStream>
-#include <QRegularExpression>
-
 
 // Init resource monitor
 ResourceMonitor::ResourceMonitor(QObject *parent) : QObject(parent) {
@@ -15,6 +14,7 @@ ResourceMonitor::ResourceMonitor(QObject *parent) : QObject(parent) {
   connect(updateTimer, &QTimer::timeout, this, [this]() {
     updateCpuUsage();
     updateMemoryUsage();
+    updateNetworkRates();
   });
 
   // start timer for 1s intervals
@@ -132,4 +132,53 @@ void ResourceMonitor::updateMemoryUsage() {
     memoryUsage = 100.0f * (1.0 - (float(memAvailable) / memTotal));
     emit memoryUsageChanged();
   }
+}
+
+// Get rxRate
+float ResourceMonitor::getRxRate() { return rxRate; }
+
+// Get txRate
+float ResourceMonitor::getTxRate() { return txRate; }
+
+// Update network usage
+void ResourceMonitor::updateNetworkRates() {
+  // filename
+  QFile netFile("/proc/net/dev");
+
+  // open file
+  if(!netFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    qDebug() << "Error reading" << netFile.fileName();
+    return;
+  }
+
+  // read file
+  QTextStream in(&netFile);
+  QString line;
+
+  while (!in.atEnd()) {
+    line = in.readLine().trimmed();
+
+    if (!line.contains(":")) continue;
+
+    QStringList parts = line.split(QRegularExpression("[:\\s]+"), Qt::SkipEmptyParts);
+
+    if (parts.size() >= 10) {
+      totalRx += parts[1].toULongLong(); // bytes received
+      totalTx += parts[1].toULongLong(); // bytes sent
+    }
+  }
+
+  if (prevRx != 0 && prevTx != 0) {
+    rxRate = (totalRx - prevRx); // bytes/sec
+    txRate = (totalTx - prevTx);
+
+    // emit signals
+    emit rxRateChanged();
+    emit txRateChanged();
+  }
+
+  prevRx = totalRx;
+  prevTx = totalTx;
+
+
 }

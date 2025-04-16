@@ -19,6 +19,8 @@ class ResourceMonitor : public QObject {
   Q_PROPERTY(float memoryUsage READ getMemoryUsage NOTIFY memoryUsageChanged)
   Q_PROPERTY(float rxRate READ getRxRate NOTIFY rxRateChanged)
   Q_PROPERTY(float txRate READ getTxRate NOTIFY txRateChanged)
+  Q_PROPERTY(qulonglong readRate READ getReadRate NOTIFY readRateChanged)
+  Q_PROPERTY(qulonglong writeRate READ getWriteRate NOTIFY writeRateChanged)
 
 public:
   explicit ResourceMonitor(QObject *parent = nullptr);
@@ -51,6 +53,20 @@ public:
    * @return The most recently computed transmit rate in bytes/sec
    */
   float getTxRate();
+
+  /*
+   * @brief Getter method for readRate
+   *
+   * @return The current disk read throughput in bytes per second.
+   */
+  qulonglong getReadRate();
+
+  /*
+   * @brief Getter method for writeRate
+   *
+   * @return The current disk write throughput in bytes per second.
+   */
+  qulonglong getWriteRate();
 
   /* @brief Method reads CPU time stats from system
    *
@@ -96,6 +112,16 @@ signals:
    */
   void txRateChanged();
 
+  /*
+   * @brief Notify QML when readRate has new value.
+   */
+  void readRateChanged();
+
+  /*
+   * @brief Notify QML when writeRate has new value.
+   */
+  void writeRateChanged();
+
 private slots:
   /* @brief updateCpuUsage runs on a 1s timer
    * This slot reacts to a system event, timeout
@@ -122,6 +148,14 @@ private slots:
    * */
   void updateNetworkRates();
 
+  /*
+   * @brief Periodically reads disk activity statistics from /proc/diskstats
+   * Computes disk read and write throughput in bytes per second.
+   * Emits readReateChanged() and writeRateChanged() to notify QML of updated
+   * values.
+   */
+  void updateDiskStats();
+
 private:
   QTimer *updateTimer;
   float cpuUsage;
@@ -136,6 +170,10 @@ private:
   qulonglong totalTx = 0;
   qulonglong prevRx = 0;
   qulonglong prevTx = 0;
+  qulonglong readRate = 0;
+  qulonglong writeRate = 0;
+  qulonglong prevReadBytes = 0;
+  qulonglong prevWriteBytes = 0;
 };
 
 #endif // RESOURCE_MONITOR_H

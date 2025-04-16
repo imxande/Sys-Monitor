@@ -15,6 +15,7 @@ ResourceMonitor::ResourceMonitor(QObject *parent) : QObject(parent) {
     updateCpuUsage();
     updateMemoryUsage();
     updateNetworkRates();
+    updateDiskStats();
   });
 
   // start timer for 1s intervals
@@ -146,7 +147,7 @@ void ResourceMonitor::updateNetworkRates() {
   QFile netFile("/proc/net/dev");
 
   // open file
-  if(!netFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+  if (!netFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
     qDebug() << "Error reading" << netFile.fileName();
     return;
   }
@@ -158,9 +159,11 @@ void ResourceMonitor::updateNetworkRates() {
   while (!in.atEnd()) {
     line = in.readLine().trimmed();
 
-    if (!line.contains(":")) continue;
+    if (!line.contains(":"))
+      continue;
 
-    QStringList parts = line.split(QRegularExpression("[:\\s]+"), Qt::SkipEmptyParts);
+    QStringList parts =
+        line.split(QRegularExpression("[:\\s]+"), Qt::SkipEmptyParts);
 
     if (parts.size() >= 10) {
       totalRx += parts[1].toULongLong(); // bytes received
@@ -179,6 +182,62 @@ void ResourceMonitor::updateNetworkRates() {
 
   prevRx = totalRx;
   prevTx = totalTx;
+}
 
+// Get readRate
+qulonglong ResourceMonitor::getReadRate() { return readRate; }
 
+// Get writeRate
+qulonglong ResourceMonitor::getWriteRate() { return writeRate; }
+
+// Disk rate update method
+void ResourceMonitor::updateDiskStats() {
+  // open file
+  QFile file("/proc/diskstats");
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    qDebug() << "Error reading " << file.fileName();
+  }
+
+  // read file
+  QTextStream in(&file);
+  qulonglong totalReadSectors = 0;
+  qulonglong totalWriteSectors = 0;
+
+  while (!in.atEnd()) {
+    QString line = in.readLine().trimmed();
+    QStringList parts =
+        line.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+
+    // field: major, minor, device, reads, write, etc, observed from cat
+    // /proc/diskstats
+    if (parts.size() > 14) {
+      QString deviceName = parts[2];
+
+      // skip loop, ram, or partitions(sda1, nvme0n1p1)
+      if (deviceName.startsWith("loop") || deviceName.startsWith("ram") || deviceName.contains("p"))
+        continue;
+
+      totalReadSectors += parts[5].toULongLong();
+      totalWriteSectors += parts[9].toULongLong();
+    }
+  }
+
+  // convert sectors to bytes (512 bytes per sector)
+  const qulonglong sectorSize = 512;
+  qulonglong totalReadBytes = totalReadSectors * sectorSize;
+  qulonglong totalWriteBytes = totalWriteSectors * sectorSize;
+
+  // compute data
+  if (prevReadBytes > 0 && prevWriteBytes > 0) {
+    readRate = totalReadBytes - prevReadBytes;
+    writeRate = totalWriteBytes - prevWriteBytes;
+
+    // emit signals
+    emit readRateChanged();
+    emit writeRateChanged();
+  }
+
+  // store next delta calculation
+  prevReadBytes = totalReadBytes;
+  prevWriteBytes = totalWriteBytes;
 }

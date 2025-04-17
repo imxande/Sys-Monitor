@@ -11,7 +11,15 @@
 ProcessManager::ProcessManager(QObject *parent) : QObject(parent) {
   // delay signal till slot ready and connection is established - populate
   // processes list
-  QTimer::singleShot(0, this, [this]() { updateProcessList(); });
+  // QTimer::singleShot(0, this, [this]() { updateProcessList(); });
+  QTimer *processTimer = new QTimer(this);
+
+  // connect timer
+  connect(processTimer, &QTimer::timeout, this, &ProcessManager::updateProcessList);
+  processTimer->start(1000);
+
+  // initial fetch
+  updateProcessList();
 }
 
 // destructor
@@ -24,6 +32,9 @@ QList<ProcessInfo> ProcessManager::getProcesses() const { return processList; }
 void ProcessManager::updateProcessList() {
   // update process list
   processList = scanProcStatus();
+
+  // sort by % CPU 
+  sortByCpuUsage(processList);
 
   // notify ProcessTab
   emit processListUpdated(processList);
@@ -153,4 +164,10 @@ double ProcessManager::calculateCpuUsage(qint64 pid) const {
     return 0.0;
 
   return 100 * ((totalTime / static_cast<double>(hertz)) / seconds);
+}
+
+void ProcessManager::sortByCpuUsage(QList<ProcessInfo> &list) {
+  std::sort(list.begin(), list.end(), [](const ProcessInfo &a, const ProcessInfo &b) {
+    return a.cpuPercent > b.cpuPercent;
+  });
 }

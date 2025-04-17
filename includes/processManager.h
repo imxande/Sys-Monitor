@@ -28,6 +28,7 @@ private:
   QList<ProcessInfo> scanProcStatus();
   QString resolveUser(const QString &uidStr) const;
   double calculateCpuUsage(qint64 pid) const;
+  void sortByCpuUsage(QList<ProcessInfo> &list);
 };
 
 #endif // PROCESS_MANAGER_H

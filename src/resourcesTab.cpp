@@ -14,25 +14,33 @@ ResourcesTab::ResourcesTab(QWidget *parent) : QWidget(parent) {
 
   // CPU graph
   cpuGraph = new QQuickWidget(this);
+  cpuGraph->setClearColor(Qt::darkCyan);
   cpuGraph->setResizeMode(QQuickWidget::SizeRootObjectToView);
+  cpuGraph->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   cpuGraph->rootContext()->setContextProperty("resourceMonitor", monitor);
   cpuGraph->setSource(QUrl("qrc:/qml/cpuGraph.qml"));
 
   // Memory and Swap graph
   memGraph = new QQuickWidget(this); 
+  memGraph->setClearColor(Qt::darkCyan);
   memGraph->setResizeMode(QQuickWidget::SizeRootObjectToView);
+  memGraph->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   memGraph->rootContext()->setContextProperty("resourceMonitor", monitor);
   memGraph->setSource(QUrl("qrc:/qml/memGraph.qml"));
 
   // Network graph
   networkGraph = new QQuickWidget(this);
+  networkGraph->setClearColor(Qt::darkCyan);
   networkGraph->setResizeMode(QQuickWidget::SizeRootObjectToView);
+  networkGraph->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   networkGraph->rootContext()->setContextProperty("resourceMonitor", monitor);
   networkGraph->setSource(QUrl("qrc:qml/networkGraph.qml"));
 
   // Disk graph
   diskGraph = new QQuickWidget(this);
+  diskGraph->setClearColor(Qt::darkCyan);
   diskGraph->setResizeMode(QQuickWidget::SizeRootObjectToView);
+  diskGraph->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   diskGraph->rootContext()->setContextProperty("resourceMonitor", monitor);
   diskGraph->setSource(QUrl("qrc:qml/diskGraph.qml"));
 
@@ -60,12 +68,14 @@ ResourcesTab::~ResourcesTab() {}
 void ResourcesTab::setResourcesLayout() {
   // placeholder
   QVBoxLayout *resourcesLayout = new QVBoxLayout;
+  QStringList sectionTitles = {"CPU", "Memory and Swap", "Network", "Disk"};
 
-  // Toogle buttons
-  resourcesLayout->addWidget(createSection("CPU"));
-  resourcesLayout->addWidget(createSection("Memory and Swap"));
-  resourcesLayout->addWidget(createSection("Network"));
-  resourcesLayout->addWidget(createSection("Disk"));
+  // create sections
+  for (const QString &title : sectionTitles) {
+    resourcesLayout->addWidget(createSection(title));
+    //resourcesLayout->setStretch(resourcesLayout->count() -1, 1);
+  }
+
 
   // set layout
   setLayout(resourcesLayout);
@@ -86,11 +96,15 @@ QWidget *ResourcesTab::createSection(const QString &title) {
 
   // collapsible content
   QFrame *content = new QFrame(section);
+  content->setContentsMargins(0, 0, 0, 0);
   content->setFrameShape(QFrame::StyledPanel);
   content->setVisible(true);
 
   // content layout
   QVBoxLayout *contentLayout = new QVBoxLayout(content);
+  contentLayout->setContentsMargins(0, 0, 0, 0);
+  contentLayout->setSpacing(0);
+
   // set graphs
   if (title == "CPU") {
     contentLayout->addWidget(cpuGraph);
@@ -101,7 +115,6 @@ QWidget *ResourcesTab::createSection(const QString &title) {
   } else {
     contentLayout->addWidget(diskGraph);
   }
-
 
   // collapse logic
   connect(toggleButton, &QToolButton::toggled, [=](bool checked) {

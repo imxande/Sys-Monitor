@@ -14,16 +14,16 @@ Item {
 
     ValueAxis {
       id: xAxis
+      labelsFont.pointSize: 8
       min: 0
       max: 60
-      titleText: "Time (s)"
     }
 
     ValueAxis {
       id: yAxis  
+      labelsFont.pointSize: 8
       min: 0
       max: 4 * 1024 * 1024 // up to 4MiB/s for now 
-      titleText: "Bytes/s"
     }
 
     LineSeries {

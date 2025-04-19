@@ -14,16 +14,16 @@ Item {
 
     ValueAxis {
       id: xAxis
+      labelsFont.pointSize: 8
       min: 0
       max: 60
-      titleText: "Time(s)"
     }
 
     ValueAxis {
       id: yAxis
+      labelsFont.pointSize: 8
       min: 0
       max: 100
-      titleText: "CPU Usage (%)"
     }
 
     LineSeries {

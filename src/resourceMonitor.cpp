@@ -12,7 +12,9 @@ ResourceMonitor::ResourceMonitor(QObject *parent) : QObject(parent) {
 
   // connect timeout signal to approptiate slot
   connect(updateTimer, &QTimer::timeout, this, [this]() {
+    qDebug() << "Timer triggered: updating resources"; // debug
     updateCpuUsage();
+    updateCpuCoreUsages();
     updateMemoryUsage();
     updateNetworkRates();
     updateDiskStats();
@@ -20,6 +22,8 @@ ResourceMonitor::ResourceMonitor(QObject *parent) : QObject(parent) {
 
   // start timer for 1s intervals
   updateTimer->start(1000);
+  QTimer::singleShot(
+      3000, this, &ResourceMonitor::updateCpuCoreUsages); // one-time debug call
 }
 
 // destructor
@@ -64,8 +68,8 @@ QPair<qulonglong, qulonglong> ResourceMonitor::readCpuUsage() {
   QFile statFile("/proc/stat");
   QTextStream in(&statFile);
   QStringList tokens;
-  qulonglong total;
-  qulonglong idleTotal;
+  qulonglong total = 0;
+  qulonglong idleTotal = 0;
 
   if (!statFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
     qDebug() << "Error reading " + statFile.fileName();
@@ -120,10 +124,11 @@ void ResourceMonitor::updateMemoryUsage() {
     QString line = in.readLine();
 
     if (line.startsWith("MemTotal:"))
-      memTotal = line.split(QRegularExpression("\\s+"))[1].toULongLong();
+      memTotal = line.split(QRegularExpression("\\s+")).value(1).toULongLong();
 
     else if (line.startsWith("MemAvailable:"))
-      memAvailable = line.split(QRegularExpression("\\s+"))[1].toULongLong();
+      memAvailable =
+          line.split(QRegularExpression("\\s+")).value(1).toULongLong();
 
     if (memTotal && memAvailable)
       break;
@@ -214,7 +219,8 @@ void ResourceMonitor::updateDiskStats() {
       QString deviceName = parts[2];
 
       // skip loop, ram, or partitions(sda1, nvme0n1p1)
-      if (deviceName.startsWith("loop") || deviceName.startsWith("ram") || deviceName.contains("p"))
+      if (deviceName.startsWith("loop") || deviceName.startsWith("ram") ||
+          deviceName.contains("p"))
         continue;
 
       totalReadSectors += parts[5].toULongLong();
@@ -240,4 +246,99 @@ void ResourceMonitor::updateDiskStats() {
   // store next delta calculation
   prevReadBytes = totalReadBytes;
   prevWriteBytes = totalWriteBytes;
+}
+
+// Get CPU Core Usages
+QVariantList ResourceMonitor::getCpuCoreUsages() const {
+  QVariantList list;
+  for (float usage : cpuCoreUsages) {
+    list.append(usage);
+  }
+  return list;
+}
+
+// Read per core usage
+QList<QPair<qulonglong, qulonglong>> ResourceMonitor::readPerCoreUsage() {
+  QList<QPair<qulonglong, qulonglong>> perCoreData;
+  QFile statFile("/proc/stat");
+
+  if (!statFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    qDebug() << "ERROR: Could not open" << statFile.fileName() << "-"
+             << statFile.errorString();
+    return {};
+  }
+
+  QTextStream in(&statFile);
+  int cpuIndex = -1;
+
+  while (!in.atEnd()) {
+    QString line = in.readLine().trimmed();
+    qDebug() << "Line:" << line;
+
+    if (line.startsWith("cpu")) {
+      cpuIndex++;
+      if (cpuIndex == 0)
+        continue; // skip total "cpu" line
+
+      QStringList tokens = line.split(" ", Qt::SkipEmptyParts);
+      if (tokens.size() < 8)
+        continue;
+
+      qulonglong user = tokens[1].toULongLong();
+      qulonglong nice = tokens[2].toULongLong();
+      qulonglong system = tokens[3].toULongLong();
+      qulonglong idle = tokens[4].toULongLong();
+      qulonglong iowait = tokens[5].toULongLong();
+      qulonglong irq = tokens[6].toULongLong();
+      qulonglong softirq = tokens[7].toULongLong();
+      qulonglong steal = tokens.value(8, "0").toULongLong();
+
+      qulonglong total =
+          user + nice + system + idle + iowait + irq + softirq + steal;
+      qulonglong idleTotal = idle + iowait;
+
+      perCoreData.append({total, idleTotal});
+    }
+  }
+
+  qDebug() << "Parsed per-core data. Total cores:" << perCoreData.size();
+  return perCoreData;
+}
+
+// update cpu core usages
+void ResourceMonitor::updateCpuCoreUsages() {
+  qDebug() << "updateCpuCoreUsages() called";
+  QList<QPair<qulonglong, qulonglong>> coreData = readPerCoreUsage();
+
+  if (coreData.isEmpty()) {
+    qDebug() << "No core data found.";
+    return;
+  }
+
+  if (prevTotalPerCore.size() != coreData.size()) {
+    qDebug() << "Detected" << coreData.size() << "CPU cores";
+    prevTotalPerCore = QVector<qulonglong>(coreData.size());
+    prevIdlePerCore = QVector<qulonglong>(coreData.size());
+    cpuCoreUsages = QList<float>(coreData.size(), 0.0f);
+  }
+
+  for (int i = 0; i < coreData.size(); ++i) {
+    qulonglong totalNow = coreData[i].first;
+    qulonglong idleNow = coreData[i].second;
+
+    qulonglong deltaTotal = totalNow - prevTotalPerCore[i];
+    qulonglong deltaIdle = idleNow - prevIdlePerCore[i];
+
+    float usage = 0.0f;
+    if (deltaTotal > 0)
+      usage = (1.0f - static_cast<float>(deltaIdle) / deltaTotal) * 100.0f;
+
+    cpuCoreUsages[i] = usage;
+
+    prevTotalPerCore[i] = totalNow;
+    prevIdlePerCore[i] = idleNow;
+  }
+
+  qDebug() << "Updated core usages:" << cpuCoreUsages;
+  emit cpuCoreUsagesChanged();
 }

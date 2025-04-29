@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QPair>
 #include <QTimer>
+#include <QVector>
+#include <QVariantList>
 
 /* @brief Resource Monitor class collects and emits system resource metrics such
  * as CPU usage memory swap, network and disk activity at regular intervals.
@@ -16,6 +18,8 @@ class ResourceMonitor : public QObject {
 
   // expose properties to QML
   Q_PROPERTY(float cpuUsage READ getCpuUsage NOTIFY cpuUsageChanged)
+  Q_PROPERTY(QVariantList cpuCoreUsages READ getCpuCoreUsages NOTIFY
+                 cpuCoreUsagesChanged)
   Q_PROPERTY(float memoryUsage READ getMemoryUsage NOTIFY memoryUsageChanged)
   Q_PROPERTY(float rxRate READ getRxRate NOTIFY rxRateChanged)
   Q_PROPERTY(float txRate READ getTxRate NOTIFY txRateChanged)
@@ -32,6 +36,12 @@ public:
    * @return cpuUsage The actual cpu usage property
    */
   float getCpuUsage();
+
+  /* @brief Getter method for cpu core usages property*
+   *
+   * @return cpuCoreUsages The actual usage per cpu core
+   */
+  QVariantList getCpuCoreUsages() const;
 
   /*
    * @brief Getter method for memory usage property
@@ -81,6 +91,8 @@ public:
    */
   QPair<qulonglong, qulonglong> readCpuUsage();
 
+  QList<QPair<qulonglong, qulonglong>> readPerCoreUsage();
+
   /*
    * @brief Reads /proc/net/dev toextract total number of bytes received
    * and sent over all network interfaces.
@@ -96,6 +108,9 @@ signals:
    * @brief Notify QML that cpu usage value has change
    */
   void cpuUsageChanged();
+
+  /*@brief Notify QML that cpu core usages value has change*/
+  void cpuCoreUsagesChanged();
 
   /*
    * @brief Notify QML that memory usage value has change
@@ -129,6 +144,12 @@ private slots:
    */
   void updateCpuUsage();
 
+  /* @brief updateCpuCoreUsages runs on a 1s timer
+   * This slot reacts to a system event, timeout
+   * Notifies QML via signal
+   */
+  void updateCpuCoreUsages();
+
   /*
    * @brief Periodically updates memory usage percentage.
    *
@@ -159,6 +180,7 @@ private slots:
 private:
   QTimer *updateTimer;
   float cpuUsage;
+  QList<float> cpuCoreUsages;
   float memoryUsage = 0.0f;
   float rxRate = 0.0f;
   float txRate = 0.0f;
@@ -174,6 +196,8 @@ private:
   qulonglong writeRate = 0;
   qulonglong prevReadBytes = 0;
   qulonglong prevWriteBytes = 0;
+  QVector<qulonglong> prevTotalPerCore;
+  QVector<qulonglong> prevIdlePerCore;
 };
 
 #endif // RESOURCE_MONITOR_H

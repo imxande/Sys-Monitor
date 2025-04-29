@@ -28,6 +28,7 @@ set(SOURCES
   src/resourceMonitor.cpp
   src/resourcesTab.cpp
 )
+
 set(HEADERS 
   includes/mainWindow.h
   includes/processesTab.h
